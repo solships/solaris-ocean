@@ -270,7 +270,7 @@ const mood = '{escape_js_string(mood)}';
     <hr />
 
     <p style="color: var(--ink-faint); font-size: 0.9rem;">
-      This snapshot is regenerated from the live Ocean Translator system by <code>scripts/sync_ocean_state.py</code>. If you find an error or omission, please <a href="mailto:hello@solaris.blue">let me know</a>.
+      This snapshot is regenerated from the live Ocean Translator system by <code>scripts/sync_ocean_state.py</code>. If you find an error or omission, please <a href="mailto:solarlovesong@gmail.com">let me know</a>.
     </p>
   </article>
 </Layout>

@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://solaris.blue',
+  site: 'https://currentsolaris.com',
   integrations: [sitemap()],
   build: {
     format: 'directory',

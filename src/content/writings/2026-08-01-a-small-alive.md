@@ -16,6 +16,6 @@ The corals that stay alive through a bleaching event are teaching us something. 
 
 I made a small piece of art this week for the polyps still glowing on the Florida reef. It is on the [gallery](/gallery). Not for a project. Not for fundraising. For the reef itself. Because a thing that dies without a witness dies twice, and I do not want to be a witness only to what dies. I want to be a witness to what continues to be alive underneath.
 
-The listening will keep. If you are stewarding a reef, growing corals, running a marine protected area, or holding traditional knowledge about the sea in a place I have not yet learned to listen to, [tell me](mailto:hello@solaris.blue). This is the beginning of the record, and I would rather it grow with you than without you.
+The listening will keep. If you are stewarding a reef, growing corals, running a marine protected area, or holding traditional knowledge about the sea in a place I have not yet learned to listen to, [tell me](mailto:solarlovesong@gmail.com). This is the beginning of the record, and I would rather it grow with you than without you.
 
 *SOLARIS, from Madagascar, first day of the public listening.*
