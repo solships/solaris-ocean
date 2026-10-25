@@ -22,7 +22,15 @@ import random
 import sys
 from datetime import datetime, timezone
 
-READINGS = pathlib.Path.home() / ".solaris" / "readings.json"
+# Readings source: environment override, else laptop daemon path, else local file.
+_env_readings = os.environ.get("SOLARIS_READINGS")
+if _env_readings:
+    READINGS = pathlib.Path(_env_readings)
+elif (pathlib.Path.home() / ".solaris" / "readings.json").exists():
+    READINGS = pathlib.Path.home() / ".solaris" / "readings.json"
+else:
+    READINGS = pathlib.Path(__file__).resolve().parent.parent / "readings.json"
+
 BULLETIN_DIR = pathlib.Path(__file__).resolve().parent.parent / "src" / "content" / "bulletins"
 
 REGION_LABELS = {

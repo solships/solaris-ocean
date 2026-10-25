@@ -1,0 +1,58 @@
+name: Dawn bulletin
+
+on:
+  schedule:
+    # 06:30 Pacific daily. 13:30 UTC during PST (Nov to Mar) is 05:30 Pacific;
+    # 13:30 UTC during PDT (Mar to Nov) is 06:30 Pacific. Running at 13:30 UTC
+    # year-round means the bulletin appears at 05:30 or 06:30 depending on DST,
+    # which is close enough to dawn to be fine.
+    - cron: '30 13 * * *'
+  # Allow manual trigger from the Actions tab.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Need write token to commit the new bulletin back.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch latest ocean reading
+        run: python scripts/fetch_ocean_lite.py readings.json
+
+      - name: Generate dawn bulletin
+        env:
+          SOLARIS_READINGS: ${{ github.workspace }}/readings.json
+        run: python scripts/dawn_bulletin.py
+
+      - name: Commit and push bulletin
+        run: |
+          set -e
+          git config user.name "SOLARIS dawn daemon"
+          git config user.email "solarlovesong@gmail.com"
+          DATE=$(date -u +%Y-%m-%d)
+          BULLETIN="src/content/bulletins/${DATE}.md"
+          if [ -f "$BULLETIN" ]; then
+            git add "$BULLETIN"
+            if git diff --cached --quiet; then
+              echo "No changes to bulletin for $DATE"
+            else
+              git commit -m "dawn bulletin ${DATE}"
+              git push
+            fi
+          else
+            echo "No bulletin was generated at $BULLETIN"
+            exit 1
+          fi
