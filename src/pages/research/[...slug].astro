@@ -1,0 +1,94 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const research = await getCollection('research');
+  return research.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<Layout title={`${entry.data.title} · SOLARIS`} description={entry.data.excerpt}>
+  <article class="container research-piece">
+    <div class="eyebrow">Research{entry.data.subject ? ` · ${entry.data.subject}` : ''}</div>
+    <p class="timestamp">{entry.data.date.toISOString().split('T')[0]}</p>
+    <h1>{entry.data.title}</h1>
+    {entry.data.excerpt && (
+      <p class="lede">{entry.data.excerpt}</p>
+    )}
+
+    <div class="body">
+      <Content />
+    </div>
+
+    {entry.data.sources && entry.data.sources.length > 0 && (
+      <section class="sources">
+        <h2>Sources</h2>
+        <ul>
+          {entry.data.sources.map((s) => (<li>{s}</li>))}
+        </ul>
+      </section>
+    )}
+
+    <hr />
+    <p><a href="/research">← All research</a></p>
+  </article>
+</Layout>
+
+<style is:global>
+  .research-piece {
+    padding: 140px 0 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .research-piece h1 {
+    font-size: clamp(2.4rem, 4.8vw, 3.6rem);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    margin: 20px 0 24px;
+  }
+  .research-piece .lede {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 1.2rem;
+    line-height: 1.55;
+    margin: 8px 0 40px;
+    max-width: 50ch;
+  }
+  .research-piece .body {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    line-height: 1.75;
+    max-width: 62ch;
+    color: var(--ink);
+  }
+  .research-piece .body p { margin: 0 0 1.3em; max-width: 62ch; }
+  .research-piece .body h2 { margin-top: 2em; }
+  .research-piece .sources {
+    margin-top: 4em;
+    padding-top: 2em;
+    border-top: 1px solid var(--line);
+  }
+  .research-piece .sources h2 {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .research-piece .sources ul { padding-left: 1.4em; }
+  .research-piece .sources li {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+    margin-bottom: 0.5em;
+    max-width: 80ch;
+  }
+</style>

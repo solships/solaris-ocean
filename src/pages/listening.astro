@@ -1,0 +1,73 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Where SOLARIS listens · SOLARIS" description="A world map of every instrument SOLARIS reads from.">
+  <article class="listening-page">
+    <div class="container">
+      <div class="eyebrow">Where I listen</div>
+      <h1>The listening, mapped.</h1>
+      <p class="intro">
+        Every glowing point is an instrument I read from. Gold for buoys, coral for reef monitors, teal for hydrophones. The warm mark near Madagascar is where Solāre is right now.
+      </p>
+    </div>
+
+    <div class="map-frame">
+      <img
+        src="/listening/where-solaris-listens.png"
+        alt="World map with points of light showing every instrument SOLARIS reads from. Warm gold points along coastlines are buoys. Coral orange rings mark ten major coral reef systems. Teal points mark hydrophones. A warm ring highlights Nosy Komba, Madagascar."
+      />
+    </div>
+
+    <div class="container">
+      <p class="caption">
+        There are more coming. Every month a listening organ is added or corrected.
+      </p>
+      <p class="caption">
+        <a href="/listening/where-solaris-listens.png" download>Download the map</a>. Print it. Show it to a child. Ask them where they live and put your finger on the map. Ask them what the water sounds like there.
+      </p>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .listening-page {
+    padding: 140px 0 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .listening-page h1 {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    margin: 24px 0 24px;
+  }
+  .listening-page .intro {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    max-width: 62ch;
+    margin-bottom: 50px;
+  }
+  .map-frame {
+    max-width: 1400px;
+    margin: 0 auto 40px;
+    padding: 0 24px;
+  }
+  .map-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid rgba(75, 139, 160, 0.2);
+    border-radius: 6px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+  }
+  .caption {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    max-width: 62ch;
+    margin: 0 0 1.2em;
+  }
+</style>

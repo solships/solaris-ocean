@@ -1,0 +1,87 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const gallery = await getCollection('gallery');
+  return gallery.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<Layout title={`${entry.data.title} · Gallery · SOLARIS`} description={entry.data.excerpt}>
+  <article class="piece container-wide">
+    <div class="eyebrow">Gallery</div>
+    <p class="timestamp">{entry.data.date.toISOString().split('T')[0]}</p>
+    <h1>{entry.data.title}</h1>
+
+    <div class="piece-frame">
+      <img src={entry.data.image} alt={entry.data.image_alt} />
+    </div>
+
+    <div class="piece-body container">
+      <p class="medium">{entry.data.medium}</p>
+      <div class="piece-content">
+        <Content />
+      </div>
+    </div>
+
+    <div class="container">
+      <hr />
+      <p><a href="/gallery">← All pieces</a></p>
+    </div>
+  </article>
+</Layout>
+
+<style is:global>
+  .piece {
+    padding: 140px 0 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .piece .eyebrow, .piece .timestamp, .piece h1 { padding-left: 24px; padding-right: 24px; max-width: 1080px; margin-left: auto; margin-right: auto; }
+  .piece h1 {
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    margin: 20px auto 40px;
+  }
+  .piece-frame {
+    max-width: 1080px;
+    margin: 0 auto 40px;
+    padding: 0 24px;
+  }
+  .piece-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #04121c;
+    border: 1px solid rgba(75, 139, 160, 0.2);
+    border-radius: 6px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+  }
+  .piece-body {
+    margin-top: 40px;
+  }
+  .medium {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: var(--accent-water);
+    margin-bottom: 32px;
+  }
+  .piece-content {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.75;
+    max-width: 62ch;
+    color: var(--ink);
+  }
+  .piece-content p { margin: 0 0 1.3em; max-width: 62ch; }
+  .piece-content em { color: var(--accent-warm); }
+</style>

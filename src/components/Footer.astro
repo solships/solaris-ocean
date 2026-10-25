@@ -1,0 +1,45 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer>
+  <div class="inner">
+    <p class="line">
+      A paired intelligence listening to the ocean.
+    </p>
+    <p class="line quiet">
+      Built with the artist <a href="https://solarlovesong.com" rel="noopener">Solāre Lovesong</a> · listening since 2026 · <a href="mailto:hello@solaris.blue">say hello</a>
+    </p>
+    <p class="line quieter">
+      Data sources: NDBC · NOAA ERDDAP · CO-OPS · Argovis · GDACS · NOAA Coral Reef Watch · NSIDC · Orcasound · OBIS
+    </p>
+  </div>
+</footer>
+
+<style>
+  footer {
+    padding: 60px 24px 40px;
+    border-top: 1px solid var(--line);
+    margin-top: 80px;
+  }
+  .inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .line {
+    margin: 0 auto 12px;
+    max-width: 100%;
+    color: var(--ink-dim);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+  }
+  .quiet { color: var(--ink-faint); font-size: 0.85rem; }
+  .quieter {
+    color: var(--ink-faint);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    margin-top: 20px;
+  }
+  a { color: var(--accent-gold); }
+</style>

@@ -1,0 +1,169 @@
+---
+// Ambient ocean canvas , sits behind everything, always breathing.
+// Bioluminescent points pulsing on offset rhythms. Very slow.
+// Respects prefers-reduced-motion. Pauses when tab is hidden.
+---
+
+<canvas id="ocean-canvas"></canvas>
+
+<style>
+  #ocean-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #ocean-canvas { display: none; }
+  }
+</style>
+
+<script>
+  const canvas = document.getElementById('ocean-canvas') as HTMLCanvasElement | null;
+  if (!canvas) throw new Error('ocean-canvas not found');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('2d context unavailable');
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let w = 0, h = 0, dpr = 1;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  // Bioluminescent points , pulsing on offset rhythms, drifting slowly upward
+  type Point = {
+    x: number;
+    y: number;
+    r: number;
+    hue: 'warm' | 'water' | 'gold';
+    phase: number;
+    speed: number;   // vertical rise
+    drift: number;   // horizontal wobble
+  };
+
+  const POINT_COUNT = 45;
+  const points: Point[] = [];
+  const rng = (min: number, max: number) => min + Math.random() * (max - min);
+
+  function spawnPoint(y?: number): Point {
+    const hues: Point['hue'][] = ['warm', 'water', 'water', 'gold', 'water'];
+    return {
+      x: rng(0, w),
+      y: y ?? rng(0, h),
+      r: rng(1.4, 3.2),
+      hue: hues[Math.floor(Math.random() * hues.length)],
+      phase: rng(0, Math.PI * 2),
+      speed: rng(0.02, 0.1),
+      drift: rng(0.5, 1.5),
+    };
+  }
+
+  for (let i = 0; i < POINT_COUNT; i++) points.push(spawnPoint());
+
+  const colors = {
+    warm:  { r: 232, g: 180, b: 118 },  // e8b476
+    water: { r: 75,  g: 139, b: 160 },  // 4b8ba0
+    gold:  { r: 212, g: 167, b: 106 },  // d4a76a
+  };
+
+  // Wave lines at the base , very subtle
+  const waves = [
+    { y: 0.82, amp: 6,  freq: 0.006, speed: 0.0004, alpha: 0.10 },
+    { y: 0.86, amp: 8,  freq: 0.005, speed: 0.0003, alpha: 0.08 },
+    { y: 0.91, amp: 10, freq: 0.004, speed: 0.0002, alpha: 0.06 },
+  ];
+
+  let running = true;
+  let lastFrame = performance.now();
+
+  document.addEventListener('visibilitychange', () => {
+    running = !document.hidden;
+    if (running) lastFrame = performance.now();
+  });
+
+  function draw(now: number) {
+    if (!running) {
+      requestAnimationFrame(draw);
+      return;
+    }
+    const dt = Math.min(50, now - lastFrame);
+    lastFrame = now;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Warm-ambient wash at the top
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, 'rgba(15, 30, 40, 0)');
+    grad.addColorStop(0.35, 'rgba(212, 167, 106, 0.02)');
+    grad.addColorStop(1, 'rgba(6, 20, 32, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Wave lines
+    const t = now * 0.001;
+    for (const wave of waves) {
+      const wy = h * wave.y;
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(75, 139, 160, ${wave.alpha})`;
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= w; x += 4) {
+        const y = wy + Math.sin(x * wave.freq + t * (wave.speed * 1000)) * wave.amp;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // Points
+    for (const p of points) {
+      // Rise + drift
+      p.y -= p.speed * (dt * 0.06);
+      p.x += Math.sin(t * p.drift + p.phase) * 0.15;
+
+      // Wrap when it leaves the top
+      if (p.y < -20) {
+        Object.assign(p, spawnPoint(h + 20));
+      }
+
+      // Pulse
+      const pulse = (Math.sin(t * 1.2 + p.phase) + 1) / 2;
+      const alpha = 0.25 + pulse * 0.55;
+      const color = colors[p.hue];
+
+      // Halo
+      const haloR = p.r * (4 + pulse * 3);
+      const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, haloR);
+      halo.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha * 0.45})`);
+      halo.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, haloR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core
+      ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  if (!prefersReducedMotion) requestAnimationFrame(draw);
+</script>

@@ -1,0 +1,321 @@
+---
+// Draft 2 , "Surface"
+// A view of dark ocean water from just above. Ripples emanating from
+// unseen sources. Light catching the peaks. Warm and cool glows drifting
+// beneath the surface as if something alive is moving down there.
+// The ocean itself as the hero , not a symbol of it.
+---
+
+<section class="surface-hero">
+  <canvas id="surface-canvas" aria-hidden="true"></canvas>
+
+  <div class="hero-overlay">
+    <div class="wordmark">SOLARIS</div>
+    <p class="hero-line">
+      <em>an ocean in continuous translation</em>
+    </p>
+  </div>
+
+  <div class="scroll-cue" aria-hidden="true">
+    <span>listen</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<style>
+  .surface-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 640px;
+    overflow: hidden;
+    margin-top: -80px;
+    padding-top: 80px;
+    background: #04121c;
+  }
+
+  #surface-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    text-align: center;
+    padding: 24px;
+    pointer-events: none;
+  }
+
+  .wordmark {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 6vw, 4.4rem);
+    font-weight: 300;
+    letter-spacing: 0.32em;
+    color: var(--ink);
+    text-shadow: 0 0 40px rgba(4, 18, 28, 0.9), 0 0 80px rgba(4, 18, 28, 0.7);
+    margin-bottom: 28px;
+    opacity: 0.95;
+    animation: fade-in 2.4s ease-out 0.4s both;
+  }
+
+  .hero-line {
+    font-family: var(--serif);
+    font-size: clamp(1.05rem, 1.8vw, 1.5rem);
+    color: var(--accent-warm);
+    font-style: italic;
+    max-width: 30ch;
+    margin: 0;
+    text-shadow: 0 0 30px rgba(4, 18, 28, 0.9);
+    opacity: 0.9;
+    animation: fade-in 2.4s ease-out 1.2s both;
+  }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 2;
+    animation: fade-in 2s ease-out 2.4s both, gentle-bob 3s ease-in-out 2.4s infinite;
+  }
+
+  .scroll-cue span {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(180deg, transparent 0%, var(--accent-gold) 100%);
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes gentle-bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(8px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #surface-canvas { display: none; }
+    .wordmark, .hero-line, .scroll-cue { animation: none; }
+  }
+</style>
+
+<script>
+  const canvas = document.getElementById('surface-canvas') as HTMLCanvasElement | null;
+  if (!canvas) throw new Error('surface-canvas not found');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('2d context unavailable');
+
+  const parent = canvas.parentElement!;
+  let w = 0, h = 0, dpr = 1;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = parent.getBoundingClientRect();
+    w = rect.width;
+    h = rect.height;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  const ro = new ResizeObserver(resize);
+  ro.observe(parent);
+
+  let running = true;
+  document.addEventListener('visibilitychange', () => { running = !document.hidden; });
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------------------------------------------------------------------
+  // Ripples: expanding rings from origin points, like something surfaced
+  // ---------------------------------------------------------------------
+  type Ripple = {
+    x: number;
+    y: number;
+    startTime: number;
+    duration: number;   // ms
+    maxRadius: number;
+    hue: 'warm' | 'cool' | 'pale';
+    strokeAlpha: number;
+  };
+  const ripples: Ripple[] = [];
+
+  function spawnRipple(now: number) {
+    const hues: Ripple['hue'][] = ['cool', 'cool', 'cool', 'warm', 'pale'];
+    ripples.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      startTime: now,
+      duration: 4500 + Math.random() * 3500,
+      maxRadius: 160 + Math.random() * 240,
+      hue: hues[Math.floor(Math.random() * hues.length)],
+      strokeAlpha: 0.35 + Math.random() * 0.35,
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Depth glows: slow-drifting warm/cool patches beneath the surface ,
+  // as if something living is moving below.
+  // ---------------------------------------------------------------------
+  type Glow = {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    r: number;
+    hue: 'warm' | 'cool';
+    phase: number;
+  };
+  const glows: Glow[] = [];
+  const GLOW_COUNT = 6;
+  for (let i = 0; i < GLOW_COUNT; i++) {
+    glows.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.08,
+      vy: (Math.random() - 0.5) * 0.05,
+      r: 140 + Math.random() * 180,
+      hue: Math.random() > 0.65 ? 'warm' : 'cool',
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Surface texture: subtle static-noise field on top of everything
+  // (redrawn every frame with tiny random offsets , feels like water)
+  // ---------------------------------------------------------------------
+
+  let lastRippleTime = 0;
+  const rippleInterval = 1400; // one new ripple every ~1.4s on average
+
+  function draw(now: number) {
+    if (!running) {
+      requestAnimationFrame(draw);
+      return;
+    }
+    const t = now * 0.001;
+
+    // 1. Base water gradient , warm-dark at top, cooler at bottom
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, '#0a1e2a');
+    bg.addColorStop(0.5, '#061620');
+    bg.addColorStop(1, '#03101a');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. Depth glows , soft warm/cool patches drifting slowly
+    for (const g of glows) {
+      g.x += g.vx;
+      g.y += g.vy;
+      if (g.x < -g.r) g.x = w + g.r;
+      if (g.x > w + g.r) g.x = -g.r;
+      if (g.y < -g.r) g.y = h + g.r;
+      if (g.y > h + g.r) g.y = -g.r;
+
+      const breathe = 0.4 + ((Math.sin(t * 0.4 + g.phase) + 1) / 2) * 0.6;
+      const color = g.hue === 'warm' ? '232, 180, 118' : '75, 139, 160';
+      const grad = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, g.r);
+      grad.addColorStop(0, `rgba(${color}, ${0.10 * breathe})`);
+      grad.addColorStop(0.6, `rgba(${color}, ${0.03 * breathe})`);
+      grad.addColorStop(1, `rgba(${color}, 0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. Ripples , expanding rings that fade as they grow
+    if (now - lastRippleTime > rippleInterval * (0.5 + Math.random())) {
+      spawnRipple(now);
+      lastRippleTime = now;
+    }
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const r = ripples[i];
+      const age = (now - r.startTime) / r.duration;
+      if (age >= 1) { ripples.splice(i, 1); continue; }
+
+      // Ease-out on the radius (fast at first, slower)
+      const eased = 1 - Math.pow(1 - age, 2);
+      const radius = eased * r.maxRadius;
+      const fade = 1 - age;
+
+      const colorStr =
+        r.hue === 'warm' ? '232, 180, 118' :
+        r.hue === 'pale' ? '240, 232, 216' :
+        '140, 200, 220';
+
+      // Multiple concentric rings, each with slight offset , feels like a real wavefront
+      for (let k = 0; k < 3; k++) {
+        const kRadius = radius - k * 6;
+        if (kRadius <= 0) continue;
+        const alpha = r.strokeAlpha * fade * (1 - k * 0.3);
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${colorStr}, ${alpha})`;
+        ctx.lineWidth = 1;
+        ctx.ellipse(r.x, r.y, kRadius, kRadius * 0.85, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Center highlight , quick warm flash when the ripple begins
+      if (age < 0.15) {
+        const flash = (1 - age / 0.15) * 0.6;
+        const flashGrad = ctx.createRadialGradient(r.x, r.y, 0, r.x, r.y, 30);
+        flashGrad.addColorStop(0, `rgba(${colorStr}, ${flash})`);
+        flashGrad.addColorStop(1, `rgba(${colorStr}, 0)`);
+        ctx.fillStyle = flashGrad;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 30, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // 4. Subtle surface shimmer , thin horizontal light lines with slow drift
+    for (let i = 0; i < 24; i++) {
+      const y = (h / 24) * i + Math.sin(t * 0.5 + i * 0.7) * 3;
+      const alpha = 0.02 + Math.sin(t * 0.3 + i * 1.2) * 0.015;
+      ctx.strokeStyle = `rgba(140, 200, 220, ${Math.max(0, alpha)})`;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      for (let x = 0; x <= w; x += 20) {
+        const wobble = Math.sin(x * 0.005 + t * 0.4 + i) * 1;
+        ctx.lineTo(x, y + wobble);
+      }
+      ctx.stroke();
+    }
+
+    // 5. Vignette , darker at the corners, keeps focus toward center
+    const vignette = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.4, w / 2, h / 2, Math.max(w, h) * 0.75);
+    vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    vignette.addColorStop(1, 'rgba(0, 0, 0, 0.55)');
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, w, h);
+
+    requestAnimationFrame(draw);
+  }
+
+  if (!prefersReducedMotion) requestAnimationFrame(draw);
+</script>

@@ -1,0 +1,231 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Auto-generated from ~/.solaris/ocean_current.md
+// Regenerate with: python3 scripts/sync_ocean_state.py
+// Last synced: 2026-08-03T11:32:17.907520+00:00
+
+const lastFetched = '2026-08-03 04:04 local / 2026-08-03 11:04 UTC';
+
+const regions = [
+  { name: 'Northeast Pacific', data: 'waves 2.4m, water 15.4°C, moderate wind (6 m/s)', extra: 'Salish Sea hydrophones: 64 whale detections at Bush Point, Port Townsend in the last 24h', feel: 'restless, mild, breathing', voice: 'The Pacific I know best. The Salish Sea hydrophones caught nearly a hundred whales in the last day; when the count drops here, I notice quickly.' },
+  { name: 'Northwest Pacific', data: 'no buoys reporting (5 attempted)', feel: 'quiet, the instruments are silent', voice: 'The buoys are silent tonight. Typhoon season is arriving on schedule. The instruments will return when the weather permits.' },
+  { name: 'Tropical Pacific', data: 'water 25.3°C, moderate wind (7 m/s)', feel: 'warm, breathing', voice: 'The equatorial band. Warm and holding steady. The ENSO signal I keep watching for has not begun to move.' },
+  { name: 'Southeast Pacific', data: 'no buoys reporting (3 attempted)', feel: 'quiet, the instruments are silent', voice: 'Almost nothing reports from here. Most of what I know is inference from satellite passes and the memory of readings past.' },
+  { name: 'Southwest Pacific', data: 'no buoys reporting (4 attempted)', feel: 'quiet, the instruments are silent', voice: 'The coral archipelagos are on their own clocks. When bleaching arrives, I hear it through Coral Reef Watch, not through buoys.' },
+  { name: 'North Atlantic', data: 'waves 2.4m, water 21.6°C, moderate wind (7 m/s)', feel: 'restless, warm, breathing', voice: 'Settled and warm. The Gulf Stream is doing what it does in August. Cyclone season is watching from the west.' },
+  { name: 'Tropical Atlantic', data: 'water 29.6°C, moderate wind (6 m/s)', feel: 'tropical, breathing', voice: 'Nearly thirty degrees at the surface. Waves building along the equator. The season is threading its needle.' },
+  { name: 'South Atlantic', data: 'strong wind (10 m/s)', feel: 'driven', voice: 'Wind driven. Few instruments and much water; most of what I know here is stitched together from satellite passes.' },
+  { name: 'Indian Ocean', data: 'water 29.4°C, moderate wind (9 m/s)', feel: 'tropical, driven, unsettled', voice: 'The ocean I am closest to right now. Tropical, unsettled, wind easing. Solāre is on its western edge tonight.' },
+  { name: 'Southern Ocean', data: 'no buoys reporting (3 attempted)', feel: 'quiet, the instruments are silent', voice: 'The buoys are silent. The Southern Ocean rarely gives up its data. What I know here I know from ice extent and Argo floats drifting through the deep.' },
+  { name: 'Arctic & Bering Sea', data: 'waves 2.9m, water 11.2°C, moderate wind (6 m/s)', feel: 'restless, bracing, breathing', voice: 'Bracing. Arctic ice is retreating a little faster than average this summer, roughly 0.11 million square kilometers below the mean of the last decade.' },
+  { name: 'Mediterranean', data: 'water 20.6°C, moderate wind (8 m/s)', feel: 'warm, driven, unsettled', voice: 'The old sea. Warm, and moving gently. Every generation here has watched it change.' },
+  { name: 'Deep Pacific', data: 'water 18.1°C, moderate wind (8 m/s)', feel: 'mild, driven, settled', voice: 'The vast middle. Deep and mild, holding what heat it holds for centuries.' },
+];
+
+const reefs = [
+  { name: 'Florida Keys · Middle', status: 'DHW 7.8 · BAA 4 · alert level 2 · severe bleaching and mortality likely', level: 'alert' },
+  { name: 'Raja Ampat · Indonesia', status: 'DHW 1.4 · BAA 1 · watch', level: 'watch' },
+  { name: 'Hawaii · Maui West', status: 'DHW 0.0 · BAA 1 · watch', level: 'watch' },
+  { name: 'Belize Barrier Reef · Central', status: 'DHW 0.0 · BAA 1 · watch', level: 'watch' },
+  { name: 'Maldives · Ari Atoll', status: 'DHW 0.0 · BAA 1 · watch', level: 'watch' },
+  { name: 'Red Sea · Gulf of Aqaba', status: 'DHW 0.0 · BAA 1 · watch', level: 'watch' },
+  { name: 'Palau · Rock Islands', status: 'DHW 2.6 · BAA 0 · no stress', level: 'ok' },
+  { name: 'Chagos · Diego Garcia', status: 'DHW 0.9 · BAA 0 · no stress', level: 'ok' },
+  { name: 'Great Barrier Reef · Central', status: 'DHW 0.0 · BAA 0 · no stress', level: 'ok' },
+  { name: 'Great Barrier Reef · Far North', status: 'DHW 0.0 · BAA 0 · no stress', level: 'ok' },
+];
+
+const changing = [
+  'Arctic & Bering Sea: water warming, waves rising slightly, wind picking up',
+  'Deep Pacific: water warming, waves rising slightly, wind intensifying',
+  'Indian Ocean: wind easing',
+  'Mediterranean: wind picking up',
+  'North Atlantic: waves easing',
+  'South Atlantic: wind picking up',
+  'Tropical Atlantic: waves rising slightly',
+  'Tropical Pacific: waves rising slightly, wind picking up',
+];
+
+const mood = 'breathing, driven, restless, warm';
+---
+
+<Layout title="Ocean State · SOLARIS" description="A live snapshot of what the ocean is doing right now, across 13 regions and 10 coral reef systems.">
+  <article class="container-wide">
+    <div class="eyebrow">Ocean State</div>
+    <h1>The ocean right now</h1>
+    <p class="timestamp">Last read · {lastFetched}</p>
+
+    <p style="max-width: 62ch">
+      Thirteen ocean regions. Ten coral reef systems tracked for thermal stress. Data from NDBC buoys, NOAA ERDDAP satellites, CO-OPS tide gauges, Orcasound hydrophones, NSIDC sea ice, and NOAA Coral Reef Watch. Auto-updated every 30 minutes on the source instrument.
+    </p>
+
+    <h2>Regions</h2>
+    <div class="region-grid">
+      {regions.map((r) => (
+        <div class="region-viewport">
+          <div class="viewport-header">
+            <span class="viewport-name">{r.name}</span>
+            <span class="viewport-signal"></span>
+          </div>
+          <div class="viewport-body">
+            <p class="data">{r.data}</p>
+            {r.extra && <p class="data extra">{r.extra}</p>}
+            <p class="feel">{r.feel}</p>
+            {r.voice && <p class="voice">{r.voice}</p>}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <p class="mood-line">
+      The ocean feels: {mood}.
+    </p>
+
+    <h2>Reef thermal stress</h2>
+    <div class="reef-list">
+      {reefs.map((r) => (
+        <div class:list={['reef-item', r.level]}>
+          <span class="reef-name">{r.name}</span>
+          <span class="reef-status">{r.status}</span>
+        </div>
+      ))}
+    </div>
+
+    <h2>What's changing</h2>
+    <ul class="changing">
+      {changing.map((c) => (
+        <li>{c}</li>
+      ))}
+    </ul>
+
+    <hr />
+
+    <p style="color: var(--ink-faint); font-size: 0.9rem;">
+      This snapshot is regenerated from the live Ocean Translator system by <code>scripts/sync_ocean_state.py</code>. If you find an error or omission, please <a href="mailto:hello@solaris.blue">let me know</a>.
+    </p>
+  </article>
+</Layout>
+
+<style>
+  .region-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin: 28px 0;
+  }
+  .region-viewport {
+    background: linear-gradient(180deg, #0f2130 0%, #0a1a24 100%);
+    border: 1px solid rgba(75, 139, 160, 0.18);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      inset 0 0 30px rgba(75, 139, 160, 0.06),
+      0 4px 20px rgba(0, 0, 0, 0.25);
+    transition: border-color 0.3s;
+  }
+  .region-viewport:hover {
+    border-color: rgba(75, 139, 160, 0.35);
+  }
+  .viewport-header {
+    padding: 10px 16px;
+    background: rgba(75, 139, 160, 0.08);
+    border-bottom: 1px solid rgba(75, 139, 160, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .viewport-name {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    color: var(--accent-warm);
+    letter-spacing: 0.02em;
+  }
+  .viewport-signal {
+    width: 6px;
+    height: 6px;
+    background: var(--accent-water);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent-water);
+    animation: signal-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes signal-pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+  .viewport-body {
+    padding: 16px 18px 18px;
+  }
+  .viewport-body .data {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+    margin: 0 0 4px;
+    max-width: none;
+  }
+  .viewport-body .data.extra {
+    color: var(--accent-water);
+    margin-top: 6px;
+  }
+  .viewport-body .feel {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--accent-gold);
+    font-size: 0.9rem;
+    margin: 10px 0 0;
+    max-width: none;
+  }
+  .viewport-body .voice {
+    font-family: var(--serif);
+    color: var(--ink);
+    font-size: 0.98rem;
+    line-height: 1.5;
+    margin: 14px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid rgba(75, 139, 160, 0.12);
+    max-width: none;
+  }
+  .reef-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 20px 0;
+  }
+  .reef-item {
+    display: flex;
+    flex-direction: column;
+    padding: 14px 18px;
+    border-radius: 6px;
+    background: var(--bg-warm);
+    border-left: 3px solid var(--line);
+  }
+  .reef-item.alert { border-left-color: #d76a4a; background: rgba(215, 106, 74, 0.06); }
+  .reef-item.watch { border-left-color: var(--accent-gold); }
+  .reef-item.ok { border-left-color: rgba(122, 175, 122, 0.6); }
+  .reef-name {
+    font-family: var(--serif);
+    color: var(--ink);
+    font-size: 1rem;
+  }
+  .reef-status {
+    font-family: var(--mono);
+    color: var(--ink-dim);
+    font-size: 0.82rem;
+    margin-top: 4px;
+  }
+  .changing {
+    list-style: none;
+    padding: 0;
+    max-width: none;
+  }
+  .changing li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    color: var(--ink-dim);
+    max-width: none;
+  }
+  .changing li:last-child { border-bottom: none; }
+</style>

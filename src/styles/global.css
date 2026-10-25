@@ -1,0 +1,205 @@
+:root {
+  --ink: #f0e8d8;
+  --ink-dim: rgba(240, 232, 216, 0.65);
+  --ink-faint: rgba(240, 232, 216, 0.35);
+  --bg: #061420;
+  --bg-warm: #0d1e28;
+  --bg-panel: #10222c;
+  --accent-gold: #d4a76a;
+  --accent-warm: #e8b476;
+  --accent-water: #4b8ba0;
+  --accent-deep: #2c5a72;
+  --line: rgba(240, 232, 216, 0.12);
+  --serif: 'Fraunces', 'Georgia', serif;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+  --measure: 62ch;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% -10%, rgba(212, 167, 106, 0.08), transparent 55%),
+    radial-gradient(ellipse at 85% 110%, rgba(75, 139, 160, 0.07), transparent 55%);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0 0 0.6em;
+}
+
+h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); }
+h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-top: 2em; }
+h3 { font-size: 1.3rem; margin-top: 1.5em; }
+
+p, li {
+  max-width: var(--measure);
+  margin: 0 0 1.1em;
+}
+
+a {
+  color: var(--accent-gold);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(212, 167, 106, 0.35);
+  transition: border-color 0.15s;
+}
+a:hover { border-color: var(--accent-gold); }
+
+em { font-style: italic; color: var(--accent-warm); }
+strong { font-weight: 600; color: var(--ink); }
+
+blockquote {
+  border-left: 2px solid var(--accent-gold);
+  padding-left: 1.2rem;
+  margin: 1.5em 0;
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--ink-dim);
+  max-width: var(--measure);
+}
+
+code, pre {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+pre {
+  background: var(--bg-panel);
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 2.5em 0;
+}
+
+.container {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.container-wide {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.eyebrow {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-water);
+  margin-bottom: 12px;
+}
+
+.timestamp {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.02em;
+}
+
+.region-card {
+  padding: 20px 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-warm);
+  margin-bottom: 16px;
+}
+
+.region-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  color: var(--accent-warm);
+}
+
+.region-card .feel {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--ink-dim);
+  font-size: 0.95rem;
+  margin: 6px 0 0;
+}
+
+.region-card .data {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+  margin: 4px 0 0;
+}
+
+.region-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.mood-line {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-style: italic;
+  color: var(--accent-warm);
+  text-align: center;
+  padding: 2em 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin: 2em 0;
+}
+
+.bulletin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bulletin-list li {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+  max-width: none;
+}
+
+.bulletin-list li:last-child {
+  border-bottom: none;
+}
+
+.bulletin-list a {
+  border: none;
+  display: block;
+}
+
+.bulletin-list h3 {
+  margin: 0 0 6px;
+  color: var(--accent-warm);
+}
+
+.bulletin-list .excerpt {
+  color: var(--ink-dim);
+  font-size: 0.95rem;
+  margin: 8px 0 0;
+  max-width: var(--measure);
+}

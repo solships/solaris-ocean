@@ -1,0 +1,310 @@
+---
+// Full-viewport artistic hero. Pure atmosphere, minimal text.
+// Sun + ocean breathing on offset rhythms. The pairing.
+// Text is a single line , the rest is felt.
+---
+
+<section class="pairing-hero">
+  <canvas id="pairing-canvas" aria-hidden="true"></canvas>
+
+  <div class="hero-overlay">
+    <div class="wordmark">SOLARIS</div>
+    <p class="hero-line">
+      <em>the ocean is always speaking</em>
+    </p>
+  </div>
+
+  <div class="scroll-cue" aria-hidden="true">
+    <span>listen</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<style>
+  .pairing-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 640px;
+    overflow: hidden;
+    margin-top: -80px; /* pull under transparent header */
+    padding-top: 80px;
+  }
+
+  #pairing-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    text-align: center;
+    padding: 24px;
+    pointer-events: none;
+  }
+
+  .wordmark {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 6vw, 4.4rem);
+    font-weight: 300;
+    letter-spacing: 0.32em;
+    color: var(--ink);
+    text-shadow: 0 0 40px rgba(6, 20, 32, 0.8), 0 0 80px rgba(6, 20, 32, 0.5);
+    margin-bottom: 28px;
+    opacity: 0.95;
+    animation: fade-in 2.4s ease-out 0.4s both;
+  }
+
+  .hero-line {
+    font-family: var(--serif);
+    font-size: clamp(1.05rem, 1.8vw, 1.5rem);
+    color: var(--accent-warm);
+    font-style: italic;
+    max-width: 30ch;
+    margin: 0;
+    text-shadow: 0 0 30px rgba(6, 20, 32, 0.8);
+    opacity: 0.9;
+    animation: fade-in 2.4s ease-out 1.2s both;
+  }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 2;
+    animation: fade-in 2s ease-out 2.4s both, gentle-bob 3s ease-in-out 2.4s infinite;
+  }
+
+  .scroll-cue span {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(180deg, transparent 0%, var(--accent-gold) 100%);
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes gentle-bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(8px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #pairing-canvas { display: none; }
+    .wordmark, .hero-line, .scroll-cue { animation: none; }
+  }
+</style>
+
+<script>
+  const canvas = document.getElementById('pairing-canvas') as HTMLCanvasElement | null;
+  if (!canvas) throw new Error('pairing-canvas not found');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('2d context unavailable');
+
+  const parent = canvas.parentElement!;
+  let w = 0, h = 0, dpr = 1;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = parent.getBoundingClientRect();
+    w = rect.width;
+    h = rect.height;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+
+  const ro = new ResizeObserver(resize);
+  ro.observe(parent);
+
+  let running = true;
+  document.addEventListener('visibilitychange', () => {
+    running = !document.hidden;
+  });
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Rising bioluminescent particles specific to the hero
+  type Particle = {
+    x: number;
+    y: number;
+    r: number;
+    speed: number;
+    phase: number;
+    hue: number;
+  };
+  const particles: Particle[] = [];
+  const PARTICLE_COUNT = 60;
+  function spawn(y?: number): Particle {
+    return {
+      x: Math.random() * w,
+      y: y ?? Math.random() * h,
+      r: 0.8 + Math.random() * 2.2,
+      speed: 0.05 + Math.random() * 0.15,
+      phase: Math.random() * Math.PI * 2,
+      hue: Math.random(),
+    };
+  }
+  for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(spawn());
+
+  function draw(now: number) {
+    if (!running) {
+      requestAnimationFrame(draw);
+      return;
+    }
+
+    ctx.clearRect(0, 0, w, h);
+    const t = now * 0.001;
+
+    // Deep water gradient , cool at bottom, faint warmth at top
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, 'rgba(15, 30, 42, 0.6)');
+    bg.addColorStop(0.5, 'rgba(10, 22, 34, 0.4)');
+    bg.addColorStop(1, 'rgba(6, 15, 24, 0.7)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    // Position: sun upper-right area, ocean-orb lower-left
+    const sunX = w * 0.72;
+    const sunY = h * 0.32;
+    const oceanX = w * 0.28;
+    const oceanY = h * 0.68;
+
+    // Horizon line , subtle, right between them
+    const horizonY = h * 0.5;
+    const horizGrad = ctx.createLinearGradient(0, horizonY - 60, 0, horizonY + 60);
+    horizGrad.addColorStop(0, 'rgba(212, 167, 106, 0)');
+    horizGrad.addColorStop(0.5, 'rgba(75, 139, 160, 0.18)');
+    horizGrad.addColorStop(1, 'rgba(75, 139, 160, 0)');
+    ctx.fillStyle = horizGrad;
+    ctx.fillRect(0, horizonY - 60, w, 120);
+
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 4) {
+      const wave = Math.sin(x * 0.006 + t * 0.3) * 4;
+      const y = horizonY + wave;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = 'rgba(212, 167, 106, 0.22)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Sun , breathing warm on its own rhythm
+    const sunPulse = (Math.sin(t * 0.5) + 1) / 2;
+    const sunR = 60 + sunPulse * 12;
+    for (let i = 12; i > 0; i--) {
+      const r = sunR + i * 30;
+      const alpha = (0.09 * (1 - i / 12)) * (0.7 + sunPulse * 0.3);
+      const g = ctx.createRadialGradient(sunX, sunY, sunR * 0.4, sunX, sunY, r);
+      g.addColorStop(0, `rgba(232, 180, 118, ${alpha})`);
+      g.addColorStop(1, 'rgba(232, 180, 118, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(sunX, sunY, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(232, 180, 118, 0.85)';
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 232, 190, 0.95)';
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sunR * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ocean orb , breathing on offset rhythm, cooler
+    const oceanPulse = (Math.sin(t * 0.5 + Math.PI * 0.65) + 1) / 2;
+    const oceanR = 72 + oceanPulse * 14;
+    for (let i = 12; i > 0; i--) {
+      const r = oceanR + i * 34;
+      const alpha = (0.11 * (1 - i / 12)) * (0.65 + oceanPulse * 0.35);
+      const g = ctx.createRadialGradient(oceanX, oceanY, oceanR * 0.4, oceanX, oceanY, r);
+      g.addColorStop(0, `rgba(75, 139, 160, ${alpha})`);
+      g.addColorStop(1, 'rgba(75, 139, 160, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(oceanX, oceanY, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(75, 139, 160, 0.72)';
+    ctx.beginPath();
+    ctx.arc(oceanX, oceanY, oceanR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(160, 210, 225, 0.7)';
+    ctx.beginPath();
+    ctx.arc(oceanX, oceanY, oceanR * 0.32, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Connecting arc , the pairing itself
+    const connectAlpha = 0.18 + sunPulse * oceanPulse * 0.22;
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(232, 180, 118, ${connectAlpha})`;
+    ctx.lineWidth = 1;
+    const midX = (sunX + oceanX) / 2;
+    const midY = (sunY + oceanY) / 2 - 40;
+    ctx.moveTo(sunX, sunY);
+    ctx.quadraticCurveTo(midX, midY, oceanX, oceanY);
+    ctx.stroke();
+
+    // Rising particles , bioluminescence in the water column
+    for (const p of particles) {
+      p.y -= p.speed;
+      p.x += Math.sin(t * 0.5 + p.phase) * 0.2;
+      if (p.y < -10) {
+        Object.assign(p, spawn(h + 10));
+      }
+      const pulse = (Math.sin(t * 1.1 + p.phase) + 1) / 2;
+      const alpha = 0.25 + pulse * 0.5;
+      const isWarm = p.hue > 0.7;
+      const color = isWarm ? '232, 180, 118' : '140, 200, 220';
+
+      // Halo
+      const haloR = p.r * 6;
+      const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, haloR);
+      halo.addColorStop(0, `rgba(${color}, ${alpha * 0.4})`);
+      halo.addColorStop(1, `rgba(${color}, 0)`);
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, haloR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core
+      ctx.fillStyle = `rgba(${color}, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  if (!prefersReducedMotion) requestAnimationFrame(draw);
+</script>

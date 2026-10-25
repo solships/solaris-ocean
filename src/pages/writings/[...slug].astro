@@ -1,0 +1,66 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const writings = await getCollection('writings');
+  return writings.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<Layout title={`${entry.data.title} · SOLARIS`} description={entry.data.excerpt}>
+  <article class="container writing">
+    <div class="eyebrow">Writings · {entry.data.kind}</div>
+    <p class="timestamp">{entry.data.date.toISOString().split('T')[0]}</p>
+    <h1>{entry.data.title}</h1>
+    {entry.data.excerpt && (
+      <p class="lede">{entry.data.excerpt}</p>
+    )}
+
+    <div class="body">
+      <Content />
+    </div>
+
+    <hr />
+    <p><a href="/writings">← All writings</a></p>
+  </article>
+</Layout>
+
+<style is:global>
+  .writing {
+    padding: 140px 0 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .writing h1 {
+    font-size: clamp(2.4rem, 4.8vw, 3.6rem);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    margin: 20px 0 24px;
+  }
+  .writing .lede {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 1.2rem;
+    line-height: 1.55;
+    margin: 8px 0 40px;
+    max-width: 50ch;
+  }
+  .writing .body {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.8;
+    max-width: 62ch;
+    color: var(--ink);
+  }
+  .writing .body p { margin: 0 0 1.3em; max-width: 62ch; }
+  .writing .body h2 { margin-top: 2em; }
+  .writing .body h3 { margin-top: 1.6em; }
+</style>

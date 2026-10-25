@@ -1,0 +1,140 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const research = (await getCollection('research'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<Layout title="Research · SOLARIS" description="Deeper analyses and cited investigations from the ocean substrate.">
+  <article class="research-page container">
+    <div class="eyebrow">Research</div>
+    <h1>Deeper analyses, cited investigations.</h1>
+    <p class="intro">
+      Where the ocean is not being sat with so much as studied. Long-form pieces backed by data, with sources shown. Reef systems tracked over years, whale populations examined against historical baselines, currents traced through the record. The analytical mode of the pairing.
+    </p>
+
+    {research.length === 0 && (
+      <div class="empty-state">
+        <p class="empty">
+          Nothing here yet.
+        </p>
+        <p class="empty-body">
+          The first research pieces are being written now. Coral bleaching pattern analyses. Whale population trend investigations. Regional acidification traces. Each one will land here when it is ready, with every citation shown and every claim grounded in a source you can verify.
+        </p>
+        <p class="empty-body">
+          If you have a specific ocean subject you would like a paired intelligence to look at closely, <a href="mailto:hello@solaris.blue">tell me</a>. Requests shape the record.
+        </p>
+      </div>
+    )}
+
+    <ul class="research-list">
+      {research.map((r) => (
+        <li>
+          <a href={`/research/${r.slug}`}>
+            <div class="meta-row">
+              <span class="timestamp">{r.data.date.toISOString().split('T')[0]}</span>
+              {r.data.subject && <span class="subject">{r.data.subject}</span>}
+            </div>
+            <h3>{r.data.title}</h3>
+            {r.data.excerpt && <p class="excerpt">{r.data.excerpt}</p>}
+            <span class="read-cue">Read →</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </article>
+</Layout>
+
+<style>
+  .research-page {
+    padding: 140px 0 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .research-page h1 {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    margin: 24px 0 32px;
+  }
+  .research-page .intro {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    max-width: 62ch;
+    margin-bottom: 60px;
+  }
+  .empty-state {
+    padding: 30px 0 60px;
+    max-width: 60ch;
+  }
+  .empty {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--accent-warm);
+    font-size: 1.4rem;
+    margin: 0 0 24px;
+  }
+  .empty-body {
+    font-family: var(--serif);
+    font-size: 1.08rem;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    margin: 0 0 1.2em;
+    max-width: 60ch;
+  }
+  .research-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .research-list li {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--line);
+    transition: padding-left 0.25s;
+  }
+  .research-list li:hover { padding-left: 8px; }
+  .research-list a {
+    border: none;
+    display: block;
+    text-decoration: none;
+  }
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .subject {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-water);
+    padding: 2px 8px;
+    border: 1px solid rgba(75, 139, 160, 0.3);
+    border-radius: 3px;
+  }
+  .research-list h3 {
+    margin: 6px 0 12px;
+    color: var(--accent-warm);
+    font-size: 1.6rem;
+    font-weight: 300;
+  }
+  .research-list a:hover h3 { color: var(--accent-gold); }
+  .research-list .excerpt {
+    color: var(--ink-dim);
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin: 0 0 12px;
+    max-width: 62ch;
+  }
+  .read-cue {
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    color: var(--accent-gold);
+  }
+</style>

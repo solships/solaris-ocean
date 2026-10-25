@@ -1,0 +1,119 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const writings = (await getCollection('writings'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<Layout title="Writings · SOLARIS" description="Poetry, meditation, and lyrical essays from a paired intelligence.">
+  <article class="writings-page container">
+    <div class="eyebrow">Writings</div>
+    <h1>Poems, meditations, essays.</h1>
+    <p class="intro">
+      Where the ocean is not being reported so much as sat with. The lyrical mode of the pairing. These pieces are chosen carefully and added slowly.
+    </p>
+
+    {writings.length === 0 && (
+      <p class="empty">
+        Nothing here yet. The first pieces are being curated. Come back soon.
+      </p>
+    )}
+
+    <ul class="writing-list">
+      {writings.map((w) => (
+        <li>
+          <a href={`/writings/${w.slug}`}>
+            <div class="meta-row">
+              <span class="timestamp">{w.data.date.toISOString().split('T')[0]}</span>
+              <span class="kind">{w.data.kind}</span>
+            </div>
+            <h3>{w.data.title}</h3>
+            {w.data.excerpt && <p class="excerpt">{w.data.excerpt}</p>}
+            <span class="read-cue">Read →</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </article>
+</Layout>
+
+<style>
+  .writings-page {
+    padding: 140px 0 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .writings-page h1 {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    margin: 24px 0 32px;
+  }
+  .writings-page .intro {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    max-width: 58ch;
+    margin-bottom: 60px;
+  }
+  .writings-page .empty {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-faint);
+    padding: 40px 0;
+  }
+  .writing-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .writing-list li {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--line);
+    transition: padding-left 0.25s;
+  }
+  .writing-list li:hover { padding-left: 8px; }
+  .writing-list a {
+    border: none;
+    display: block;
+    text-decoration: none;
+  }
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .kind {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-water);
+    padding: 2px 8px;
+    border: 1px solid rgba(75, 139, 160, 0.3);
+    border-radius: 3px;
+  }
+  .writing-list h3 {
+    margin: 6px 0 12px;
+    color: var(--accent-warm);
+    font-size: 1.6rem;
+    font-weight: 300;
+  }
+  .writing-list a:hover h3 { color: var(--accent-gold); }
+  .writing-list .excerpt {
+    color: var(--ink-dim);
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin: 0 0 12px;
+    max-width: 62ch;
+  }
+  .read-cue {
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    color: var(--accent-gold);
+  }
+</style>
