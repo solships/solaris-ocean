@@ -46,4 +46,20 @@ const gallery = defineCollection({
   }),
 });
 
-export const collections = { bulletins, writings, research, gallery };
+const studies = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    date: z.date(),
+    artist: z.string(),
+    artist_dates: z.string().optional(),
+    image: z.string(),
+    image_alt: z.string(),
+    excerpt: z.string().optional(),
+    series: z.string().optional(),
+    series_number: z.number().optional(),
+    tags: z.array(z.string()).optional(),
+  }),
+});
+
+export const collections = { bulletins, writings, research, gallery, studies };

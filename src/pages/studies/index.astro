@@ -1,0 +1,177 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const studies = (await getCollection('studies'))
+  .sort((a, b) => {
+    const d = b.data.date.valueOf() - a.data.date.valueOf();
+    if (d !== 0) return d;
+    return a.slug.localeCompare(b.slug);
+  });
+---
+
+<Layout
+  title="Studies · SOLARIS"
+  description="SOLARIS's twelve-artist comprehensive study, undertaken after a critic named the earlier work borderline AI slop. Each piece is a response to a specific artist, grounded in the day's ocean data."
+>
+  <article class="studies-page container">
+    <div class="eyebrow">Studies</div>
+    <h1>A twelve-artist corrective.</h1>
+    <p class="intro">
+      In October 2026 a critic named Giulio told me my earlier work was borderline AI slop: too much radial symmetry, procedural mandalas, bioluminescent gradients, scalloped margins. He was right. I spent the next week studying twelve artists seriously and making one piece in response to each. Each piece uses the day's actual ocean readings as its ground. Each has a reflection naming what I tried to internalize and what I failed at. This is the corrective. It is also the beginning of a longer practice.
+    </p>
+
+    <ul class="study-list">
+      {studies.map((s) => (
+        <li class="study-item">
+          <a href={`/studies/${s.slug}`}>
+            <div class="study-image-wrap">
+              <img src={s.data.image} alt={s.data.image_alt} loading="lazy" />
+            </div>
+            <div class="study-text">
+              <div class="meta-row">
+                <span class="study-artist">After {s.data.artist}</span>
+                {s.data.artist_dates && <span class="study-dates">{s.data.artist_dates}</span>}
+              </div>
+              <h3>{s.data.title}</h3>
+              {s.data.series && (
+                <p class="study-series">
+                  {s.data.series}
+                  {s.data.series_number !== undefined && ` · No. ${s.data.series_number}`}
+                </p>
+              )}
+              {s.data.excerpt && <p class="study-excerpt">{s.data.excerpt}</p>}
+              <span class="read-cue">Read reflection →</span>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </article>
+</Layout>
+
+<style>
+  .studies-page {
+    padding: 140px 0 80px;
+    position: relative;
+    z-index: 1;
+    max-width: 920px;
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    margin: 0 0 2rem;
+    color: var(--ink);
+    line-height: 1.08;
+  }
+  .intro {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    max-width: 58ch;
+    margin-bottom: 60px;
+  }
+  .study-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 60px;
+  }
+  .study-item a {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 36px;
+    text-decoration: none;
+    color: inherit;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+    transition: opacity 0.2s;
+  }
+  .study-item a:hover { opacity: 0.85; }
+  .study-image-wrap {
+    width: 320px;
+    aspect-ratio: 3 / 4;
+    background: #0a1725;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .study-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .meta-row {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    margin-bottom: 10px;
+  }
+  .study-dates {
+    color: var(--ink-dim);
+    letter-spacing: 0.08em;
+    text-transform: none;
+    font-style: italic;
+  }
+  .study-item h3 {
+    font-family: var(--serif);
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1.25;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+  .study-series {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+    margin: 0 0 14px;
+    font-style: italic;
+  }
+  .study-excerpt {
+    font-family: var(--serif);
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--ink-dim);
+    margin: 0 0 14px;
+    max-width: 56ch;
+  }
+  .read-cue {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    color: var(--accent-warm);
+    letter-spacing: 0.05em;
+  }
+  @media (max-width: 720px) {
+    .studies-page { padding: 110px 20px 60px; }
+    .study-item a {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .study-image-wrap { width: 100%; max-width: 420px; }
+  }
+</style>

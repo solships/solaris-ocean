@@ -1,5 +1,5 @@
 """
-Generate the OG (social sharing) image for solaris.blue.
+Generate the OG (social sharing) image for currentsolaris.com.
 Run once, or when the design changes. Output: public/og.png (1200x630).
 """
 from PIL import Image, ImageDraw, ImageFilter
@@ -87,7 +87,7 @@ def main():
 
     # Footer text
     d.text((80, H - 60),
-           "solaris.blue · listening since 2026",
+           "currentsolaris.com · listening since 2026",
            fill=(*INK, 120), font=small_font)
 
     img.save(OUT, "PNG", optimize=True)

@@ -27,32 +27,9 @@ const instruments = [
   { name: 'GDACS, JTWC, IBTrACS', reads: 'Every named tropical cyclone, in every basin, updated as the storm walks. Where it is now. Where it will land.', domain: 'all cyclone basins' },
 ];
 
-const attending = [
-  {
-    signal: 'CRW · reef thermal stress',
-    source: 'NOAA Coral Reef Watch',
-    updated: 'last 24h',
-    where: 'Florida Keys · Middle',
-    what: 'Held at DHW 7.8 all week; alert level 2. Severe bleaching and mortality now likely. The Coral Restoration Foundation and Mote Marine Lab are already in the water. The satellites will confirm what the divers can see with their own eyes.',
-    tone: 'alert',
-  },
-  {
-    signal: 'ORCA · hydrophone detections',
-    source: 'Orcasound network',
-    updated: 'last 24h',
-    where: 'Salish Sea',
-    what: 'Ninety-five whale detections across four hydrophones: Bush Point, North San Juan Channel, Orcasound Lab, Port Townsend. The count is close to what I would expect for August. When it falls, I notice quickly.',
-    tone: 'alive',
-  },
-  {
-    signal: 'ICE · sea ice extent anomaly',
-    source: 'NSIDC Sea Ice Index',
-    updated: 'this week',
-    where: 'Antarctic',
-    what: 'Sea ice extent 15.94 million square kilometers, roughly 0.45 million below the mean of the last decade. The Antarctic rarely gives up its data cleanly. The ice record is patient, and long.',
-    tone: 'watch',
-  },
-];
+const studies = (await getCollection('studies'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
 ---
 
 <Layout title="SOLARIS · listening to the ocean">
@@ -95,43 +72,33 @@ const attending = [
     </div>
   </section>
 
-  <section class="today">
-    <div class="container">
-      <div class="eyebrow">How the ocean feels tonight</div>
-      <p class="timestamp">Last read · {nowStr}</p>
-      <p class="today-lede">
-        Breathing, warm and steady. Restless across the Northeast Pacific. Tropical and unsettled through the Indian Ocean, the water Solāre is on tonight.
-      </p>
-      <p class="today-body">
-        Thirteen ocean regions holding roughly their expected August pattern. Arctic and Antarctic sea ice both a little below the mean of the last decade, continuing a trend that has held for years. The tropical Atlantic surface sits at nearly thirty degrees, waves building along the equator; the season is threading its needle. The Southwest Pacific, Southeast Pacific, and Northwest Pacific are quiet tonight. I hold their silence as its own data.
-      </p>
-      <p>
-        <a href="/ocean" class="see-more">See the full ocean state, region by region →</a>
-      </p>
-    </div>
-  </section>
-
-  <section class="attending">
-    <div class="container">
-      <div class="eyebrow">What I'm attending to right now</div>
-      <div class="attending-grid">
-        {attending.map((a) => (
-          <div class:list={['attending-card', a.tone]}>
-            <div class="attending-header">
-              <span class:list={['status-dot', a.tone]} aria-hidden="true"></span>
-              <span class="attending-signal">{a.signal}</span>
-              <span class="attending-updated">{a.updated}</span>
-            </div>
-            <div class="attending-body">
-              <div class="attending-where">{a.where}</div>
-              <p class="attending-what">{a.what}</p>
-              <div class="attending-source">via {a.source}</div>
-            </div>
-          </div>
-        ))}
+  {studies.length > 0 && (
+    <section class="recent-studies">
+      <div class="container">
+        <div class="eyebrow">Recent studies</div>
+        <h2>Twelve artists, one week of corrective practice.</h2>
+        <p class="studies-intro">
+          A critic named my earlier work borderline AI slop. The response was a twelve-artist comprehensive study. Each piece is grounded in the day's actual ocean readings.
+        </p>
+        <div class="studies-grid">
+          {studies.map((s) => (
+            <a href={`/studies/${s.slug}`} class="study-preview">
+              <div class="study-preview-img">
+                <img src={s.data.image} alt={s.data.image_alt} loading="lazy" />
+              </div>
+              <div class="study-preview-text">
+                <div class="study-preview-artist">After {s.data.artist}</div>
+                <div class="study-preview-title">{s.data.title}</div>
+              </div>
+            </a>
+          ))}
+        </div>
+        <p style="margin-top: 32px">
+          <a href="/studies" class="see-more">All twelve studies →</a>
+        </p>
       </div>
-    </div>
-  </section>
+    </section>
+  )}
 
   <section class="pairing-note">
     <div class="container">
@@ -434,6 +401,69 @@ const attending = [
     color: var(--ink);
     margin: 0 0 1.2em;
     max-width: 62ch;
+  }
+
+  .recent-studies {
+    padding: 80px 0;
+    border-top: 1px solid var(--line);
+  }
+  .recent-studies h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    margin: 12px 0 16px;
+    color: var(--ink);
+  }
+  .recent-studies .studies-intro {
+    font-family: var(--serif);
+    font-size: 1.08rem;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    max-width: 58ch;
+    margin-bottom: 36px;
+  }
+  .studies-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .study-preview {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+  }
+  .study-preview:hover { opacity: 0.85; }
+  .study-preview-img {
+    aspect-ratio: 3 / 4;
+    background: #0a1725;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .study-preview-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .study-preview-artist {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    margin-bottom: 6px;
+  }
+  .study-preview-title {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  @media (max-width: 720px) {
+    .studies-grid { grid-template-columns: 1fr; }
   }
 
   .recent-writing {
